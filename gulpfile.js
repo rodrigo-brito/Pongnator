@@ -13,7 +13,7 @@ var uglify = require('gulp-uglify');
 // Can add paths for javascript or images for example
 // The folder, files to look for and destination are all required for sass
 var paths = {
-	all : './**/*.*',
+	all : './**/*.html',
     root: './',
     styles: {
         src: './assets/sass',
@@ -22,7 +22,7 @@ var paths = {
     },
     scripts: {
         src: './assets/js',
-        files: ['./assets/js/**/*.js', '!./assets/js/main.min.js'],
+        files: ['./assets/js/lib/*.js', './assets/js/main.js'],
     }
 
 }
@@ -76,9 +76,9 @@ gulp.task('sass', function (){
 
 gulp.task('scripts', function() {
   gulp.src( paths.scripts.files )
-    .pipe(concat('main.min.js'))
-    .pipe(uglify())
-    .pipe(gulp.dest( paths.scripts.src ))
+    .pipe( concat('main.min.js') )
+    .pipe( uglify() )
+    .pipe( gulp.dest( paths.scripts.src ) )
     .pipe( connect.reload() )
 });
 
@@ -88,8 +88,8 @@ gulp.task( 'files', function() {
 
 gulp.task( 'watch', function() {
 	gulp.watch( paths.all, [ 'files' ]);
+    gulp.watch( paths.scripts.files , ['scripts'] );
     gulp.watch( paths.styles.files, ['sass'])
-	gulp.watch( paths.scripts.files , ['scripts'] )
     // Also when there is a change, display what file was changed, only showing the path after the 'sass folder'
     .on('change', function(evt) {
         console.log(
