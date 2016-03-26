@@ -7,6 +7,8 @@ DEMO PAGE - http://rodrigo-brito.github.io/Pong-Matter/
 - Node JS / NPM
 - Gulp - `npm install -g gulp`
 
-To run:
+To compile styles and scripts:
+
 `npm install`
+
 `gulp`
