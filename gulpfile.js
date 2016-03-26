@@ -8,6 +8,7 @@ var stripCssComments = require('gulp-strip-css-comments');
 var connect = require( 'gulp-connect' );
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+var plumber = require('gulp-plumber');
 
 // This is an object which defines paths for the styles.
 // Can add paths for javascript or images for example
@@ -51,6 +52,7 @@ var displayError = function(error) {
 gulp.task('sass', function (){
     // Taking the path from the above object
     gulp.src(paths.styles.files)
+    .pipe( plumber() )
     // Sass options - make the output compressed and add the source map
     // Also pull the include path from the paths object
     .pipe(sass({
@@ -58,24 +60,23 @@ gulp.task('sass', function (){
         sourceComments: 'map',
         includePaths : [paths.styles.src]
     }))
-    // If there is an error, don't stop compiling but use the custom displayError function
-    .on('error', function(err){
-        displayError(err);
-    })
-    // Pass the compiled sass through the prefixer with defined 
+    // Pass the compiled sass through the prefixer with defined
     .pipe(prefix(
         'last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'
     ))
-    .pipe(stripCssComments(
-	{preserve: false}
-    ))
+    .pipe( stripCssComments({
+        preserve: false
+    }))
+    .pipe(plumber.stop())
     // Funally put the compiled sass into a css file
     .pipe(gulp.dest(paths.styles.dest))
+    // If there is an error, don't stop compiling but use the custom displayError function
     .pipe(connect.reload());
 });
 
 gulp.task('scripts', function() {
   gulp.src( paths.scripts.files )
+    .pipe( plumber() )
     .pipe( concat('main.min.js') )
     .pipe( uglify() )
     .pipe( gulp.dest( paths.scripts.src ) )

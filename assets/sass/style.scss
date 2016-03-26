@@ -6,7 +6,7 @@ body {
 canvas {
 	display: inline-block;
 	max-width: 100vw;
-	max-height: 85vh;
+	max-height: 100vh;
 	cursor: -webkit-grab;
 	cursor: grab;
 }
@@ -14,16 +14,4 @@ canvas {
 canvas:active {
 	cursor: -webkit-grabbing;
 	cursor: grabbing;
-}
-
-.axis {
-	display: inline-block;
-	margin: 20px 40px 0px;
-	color: #fbfbfb;
-	max-width: 50%;
-}
-
-.output {
-	display: inline-block;
-	width: 30px;
 }
