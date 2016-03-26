@@ -28,8 +28,9 @@ var paths = {
 
 }
 
-// A display error function, to format and make custom errors more uniform
-// Could be combined with gulp-util or npm colors for nicer output
+/**
+ * Exibe os erros de execução de forma minificada em linha única
+ */
 var displayError = function(error) {
 
     // Initial building up of the error
@@ -48,19 +49,17 @@ var displayError = function(error) {
     console.error(errorString);
 }
 
-// Setting up the sass task
+/**
+ * Compila e minifica o CSS
+ */
 gulp.task('sass', function (){
-    // Taking the path from the above object
     gulp.src(paths.styles.files)
-    .pipe( plumber() )
-    // Sass options - make the output compressed and add the source map
-    // Also pull the include path from the paths object
+    .pipe(plumber(displayError))
     .pipe(sass({
         outputStyle: 'compressed',
         sourceComments: 'map',
         includePaths : [paths.styles.src]
     }))
-    // Pass the compiled sass through the prefixer with defined
     .pipe(prefix(
         'last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'
     ))
@@ -68,21 +67,22 @@ gulp.task('sass', function (){
         preserve: false
     }))
     .pipe(plumber.stop())
-    // Funally put the compiled sass into a css file
     .pipe(gulp.dest(paths.styles.dest))
-    // If there is an error, don't stop compiling but use the custom displayError function
     .pipe(connect.reload());
 });
 
 gulp.task('scripts', function() {
   gulp.src( paths.scripts.files )
-    .pipe( plumber() )
-    .pipe( concat('main.min.js') )
+    .pipe( plumber(displayError) )
     .pipe( uglify() )
+    .pipe( concat('main.min.js') )
     .pipe( gulp.dest( paths.scripts.src ) )
     .pipe( connect.reload() )
 });
 
+/**
+ * Monitora a mudança de arquivos estáticos
+ */
 gulp.task( 'files', function() {
 	gulp.src( paths.all ).pipe( connect.reload() );
 });
@@ -106,7 +106,4 @@ gulp.task( 'connect', function() {
 	});
 });
 
-
-// This is the default task - which is run when `gulp` is run
-// The tasks passed in as an array are run before the tasks within the function
 gulp.task('default', ['sass', 'scripts', 'connect', 'watch']);
