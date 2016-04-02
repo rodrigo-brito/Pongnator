@@ -10,17 +10,67 @@ Events = Matter.Events,
 MouseConstraint = Matter.MouseConstraint,
 render = Matter.Render.create();
 
+var texPlacar = new Image();
+texPlacar.src = "assets/img/placar.png";
+
+
+var TEX_BOLA = "assets/img/bola1.png";
+var TEX_JOGADOR = "assets/img/jogador1.png";
+var TEX_POWERUP = "assets/img/powerup.png";
+var TEX_BACKGROUND = "assets/img/backgrounds/bg03.png";
+var TEX_BARRA_SUPERIOR = "assets/img/barra_superior.png";
+var TEX_BARRA_INFERIOR = "assets/img/barra_inferior.png";
+
 var LARGURA = 1000;
 var ALTURA = 500;
+
+var minJogadorPosY = 80;
+var maxJogadorPosY = ALTURA-80;
+
+var taxaAumentoVelocidade = .5;
+var velocidadeJogador = 10;
+
+
+var spriteBola = {
+	maxIndice: 29,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+
+		return "assets/img/bola/"+this.indiceAtual+".png";
+	}
+}
+
+var spritePowerUp = {
+	maxIndice: 59,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+		return "assets/img/powerup/"+this.indiceAtual+".png";
+	}
+}
+
+
 
 // create a Matter.js engine
 var engine = Engine.create(document.body, {
 	render: {
 		options: {
 			wireframes: false,
-			showAngleIndicator: true,
+			showAngleIndicator: false,
 			width: 1000,
-			height: 500
+			height: 500,
+			background: TEX_BACKGROUND,
 		}
 	},
 	world: {
@@ -43,7 +93,7 @@ World.add(engine.world, mouseConstraint);
 function reiniciarRodada(){
 	Body.setVelocity(bola, {x: 0, y: 0});
 	Body.setAngularVelocity(bola, 0);
-	Body.setPosition(bola, {x: LARGURA/2, y: ALTURA/2});
+	Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
 	estadoAtual = EstadoJogo.PAUSADO;
 }
 
@@ -59,18 +109,29 @@ function draw(){
 	// analisa o suporte pelo navegador
 	if(context){
 		//desenha o placar
-		context.fillStyle = "#000";
+		context.drawImage(texPlacar, LARGURA/2-75,0,150,40);
+		context.fillStyle = "#FFF";
 		context.font = "30px Arial";
-		context.fillText(player1.pontuacao, 50, 60);
-		context.fillText(player2.pontuacao, LARGURA-70, 60);
+		context.fillText(player1.pontuacao, LARGURA/2-55, 26);
+		context.fillText(player2.pontuacao, LARGURA/2+40, 26);
+		
 
 		// caso o jogo esteja pausado, pede que o usuario pressione espaco
 		// removendo isto, faz com que o jogo seja continuo
 		if (estadoAtual == EstadoJogo.PAUSADO) {
-			context.fillStyle = "#000";
+			context.fillStyle = "#FFF";
 			context.fillText("Pressione espaco para continuar",300,ALTURA/2);
+
+			// Define que a bola estara estacionaria
+			Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
+			Body.setVelocity(bola, {x: 0, y: 0});
 		}
+
 	}
+
+	// atualiza os sprites
+	bola.render.sprite.texture = spriteBola.getProximoSprite();
+	powerUp.render.sprite.texture = spritePowerUp.getProximoSprite();
 }
 
 /**
@@ -78,20 +139,83 @@ function draw(){
  * ---------------------------------------------------------------
  */
 
+
 //Borda Direita
-var bordaDireita = Bodies.rectangle(LARGURA, ALTURA/2, 50, ALTURA, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 });
+var bordaDireita = Bodies.rectangle(LARGURA+20, ALTURA/2, 50, 500, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1,
+render: {
+    visible:false
+  }
+ });
 //Borda Esquerda
-var bordaEsquerda = Bodies.rectangle(0, ALTURA/2, 50, ALTURA, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 });
+var bordaEsquerda = Bodies.rectangle(-20, ALTURA/2, 50, 500, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 ,
+render: {
+    visible:false
+  }
+});
 //Borda Topo
-var bordaTopo = Bodies.rectangle(LARGURA/2, 0, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 });
+var bordaTopo = Bodies.rectangle(LARGURA/2, 10, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 ,
+render: {
+    sprite: {
+      texture: TEX_BARRA_SUPERIOR,
+      xScale: 1.0,
+      yScale: 1.0
+    }
+  }
+});
 //Borda Baixo
-var bordaBaixo = Bodies.rectangle(LARGURA/2, ALTURA, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 });
+var bordaBaixo = Bodies.rectangle(LARGURA/2, ALTURA-10, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1,
+render: {
+    sprite: {
+      texture: TEX_BARRA_INFERIOR,
+      xScale: 1.0,
+      yScale: 1.0,
+    }
+  } 
+});
 
 //Declaração dos elementos do jogo
-var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1.07,  frictionStatic: 0, frictionAir: 0 });
-var player1 = Bodies.rectangle( 50, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1 });
-var player2 = Bodies.rectangle( LARGURA-50, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1 });
-var powerUp = Bodies.rectangle( 400, 350, 50, 50, { mass: 0.0000001, inertia: 0, frictionStatic: 0, isStatic: false, frictionAir: 0, friction: 0, restitution: 0 });
+//var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1.07,  frictionStatic: 0, frictionAir: 0 });
+var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1,  frictionStatic: 0, frictionAir: 0,
+render: {
+    sprite: {
+      texture: spriteBola.getProximoSprite(),
+      xScale: 0.4,
+      yScale: 0.4,
+    }
+  }
+});
+
+var player1 = Bodies.rectangle(20, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1,
+render: {
+    sprite: {
+      texture: TEX_JOGADOR,
+      xScale: 0.5,
+      yScale: 0.5
+    }
+  }
+ });
+var player2 = Bodies.rectangle( LARGURA-20, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1, 
+
+render: {
+    sprite: {
+      texture: TEX_JOGADOR,
+      xScale: 0.5,
+      yScale: 0.5
+    }
+  }
+
+});
+var powerUp = Bodies.rectangle( 400, 350, 50, 50, { mass: 0.0000001, inertia: 0, frictionStatic: 0, isStatic: false, frictionAir: 0, friction: 0, restitution: 0 ,
+
+render: {
+    sprite: {
+      texture: spritePowerUp.getProximoSprite(),
+      xScale: 0.4,
+      yScale: 0.4
+    }
+  }
+
+});
 //Atributos auxiliares dos jogadores
 player1.pontuacao = 0;
 player2.pontuacao = 0;
@@ -116,16 +240,24 @@ World.add(engine.world, [
 // utiliza o handler do teclado para selecionar qual movimento deve ser efetuado
 function moveJogadores() {
 	if(Key.isDown(87)){
-		Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-5 });
+		if(player1.position.y>minJogadorPosY){
+			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-velocidadeJogador });
+		}
 	}
 	if(Key.isDown(83)){
-		Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+5 });
+		if(player1.position.y<maxJogadorPosY){
+			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+velocidadeJogador });
+		}
 	}
 	if(Key.isDown(Key.ACIMA)){
-		Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-5 });
+		if(player2.position.y>minJogadorPosY){
+			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-velocidadeJogador });
+		}
 	}
 	if(Key.isDown(Key.ABAIXO)){
-		Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+5 });
+		if(player2.position.y<maxJogadorPosY){
+			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+velocidadeJogador });
+		}
 	}
 }
 
@@ -172,6 +304,18 @@ Events.on(engine, 'afterRender', function(event){
 	draw();
 });
 
+function aumentaVelocidadeBola(){
+	if(bola.velocity.x>0 && bola.velocity.y>0){
+		Body.setVelocity(bola, {x:bola.velocity.x+taxaAumentoVelocidade,y:bola.velocity.y+taxaAumentoVelocidade});
+	}else if(bola.velocity.x<0 && bola.velocity.y<0){
+		Body.setVelocity(bola, {x:bola.velocity.x-taxaAumentoVelocidade,y:bola.velocity.y-taxaAumentoVelocidade});
+	}else if(bola.velocity.x>0 && bola.velocity.y<0){
+		Body.setVelocity(bola, {x:bola.velocity.x+taxaAumentoVelocidade,y:bola.velocity.y-taxaAumentoVelocidade});
+	}else{
+		Body.setVelocity(bola, {x:bola.velocity.x-taxaAumentoVelocidade,y:bola.velocity.y+taxaAumentoVelocidade});
+	}
+}
+
 /**
  * Tratamento de colisões
  * ---------------------------------------------------------------
@@ -182,6 +326,8 @@ var colisaoPlayer2 = Matter.Pair.id(bola, player2);
 var colisaoPontoP1 = Matter.Pair.id(bola, bordaDireita);
 var colisaoPontoP2 = Matter.Pair.id(bola, bordaEsquerda);
 var colisaoPowerUp = Matter.Pair.id(bola, powerUp);
+var colisaoBordaTopo = Matter.Pair.id(bola,bordaTopo);
+var colisaoBordaBaixo = Matter.Pair.id(bola,bordaBaixo);
 
 Events.on(engine, "collisionStart", function(event){
 	var pairs = event.pairs;
@@ -190,11 +336,18 @@ Events.on(engine, "collisionStart", function(event){
 		if(pair.id == colisaoPlayer2){
 			pair.bodyA.render.fillStyle = 'red';
 			pair.bodyB.render.fillStyle = 'red';
+			//console.log("x "+bola.velocity.x+" y "+bola.velocity.y);
+
+			// aumenta a velocidade da bola
+			aumentaVelocidadeBola();
 		}
 
 		if(pair.id == colisaoPlayer1){
 			pair.bodyA.render.fillStyle = 'green';
 			pair.bodyB.render.fillStyle = 'green';
+
+			// aumenta a velocidade da bola
+			aumentaVelocidadeBola();
 		}
 
 		if(pair.id == colisaoPontoP1){
@@ -216,8 +369,14 @@ Events.on(engine, "collisionStart", function(event){
 				powerUp.collisionFilter = bola.collisionFilter;
 				Body.setVelocity(powerUp, {x: 0, y: 0});
 				Body.setAngularVelocity(powerUp, 0);
-				Body.setPosition(powerUp, {x: LARGURA/2, y: ALTURA/2});
+				Body.setPosition(powerUp, {x: Math.floor((Math.random() * LARGURA) + 1), y: Math.floor((Math.random() * ALTURA) + 1)});
 			}, 2000);
+		}
+		if(pair.id == colisaoBordaTopo){
+			aumentaVelocidadeBola();
+		}
+		if(pair.id == colisaoBordaBaixo){
+			aumentaVelocidadeBola();
 		}
 	}
 });
