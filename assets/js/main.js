@@ -101,6 +101,15 @@ function lancarBola(){
 	Body.setVelocity(bola, {x: -5, y: -5});
 }
 
+function lancarPowerUp(){
+	setInterval(function(){
+		powerUp.collisionFilter = bola.collisionFilter;
+		Body.setVelocity(powerUp, {x: 0, y: 0});
+		Body.setAngularVelocity(powerUp, 0);
+		Body.setPosition(powerUp, {x: Math.floor((Math.random() * LARGURA) + 1), y: Math.floor((Math.random() * ALTURA) + 1)});
+	}, 10000);
+}
+
 // funcao de desenho
 // realiza todo o desenho dos objetos na tela
 function draw(){
@@ -114,7 +123,7 @@ function draw(){
 		context.font = "30px Arial";
 		context.fillText(player1.pontuacao, LARGURA/2-55, 26);
 		context.fillText(player2.pontuacao, LARGURA/2+40, 26);
-		
+
 
 		// caso o jogo esteja pausado, pede que o usuario pressione espaco
 		// removendo isto, faz com que o jogo seja continuo
@@ -170,7 +179,7 @@ render: {
       xScale: 1.0,
       yScale: 1.0,
     }
-  } 
+  }
 });
 
 //Declaração dos elementos do jogo
@@ -205,7 +214,7 @@ render: {
   }
 
 });
-var powerUp = Bodies.rectangle( 400, 350, 50, 50, { mass: 0.0000001, inertia: 0, frictionStatic: 0, isStatic: false, frictionAir: 0, friction: 0, restitution: 0 ,
+var powerUp = Bodies.rectangle( 400, 300, 50, 50, { mass: 0.0000001, inertia: 0, frictionStatic: 0, isStatic: false, frictionAir: 0, friction: 0, restitution: 0 ,
 
 render: {
     sprite: {
@@ -316,6 +325,21 @@ function aumentaVelocidadeBola(){
 	}
 }
 
+function reduzBarra(barra, tempo){
+	Body.scale(barra, 1, 0.5);
+	barra.render.sprite.yScale = barra.render.sprite.yScale/2;
+	if(tempo){
+		setTimeout(function(){ aumentaBarra(barra)}, tempo);
+	}
+}
+function aumentaBarra(barra, tempo){
+	barra.render.sprite.yScale = barra.render.sprite.yScale * 2;
+	Body.scale(barra, 1, 2);
+	if(tempo){
+		setTimeout(function(){ reduzBarra(barra)}, tempo);
+	}
+}
+
 /**
  * Tratamento de colisões
  * ---------------------------------------------------------------
@@ -340,6 +364,8 @@ Events.on(engine, "collisionStart", function(event){
 
 			// aumenta a velocidade da bola
 			aumentaVelocidadeBola();
+			// identifica a origem da última rebatida
+			powerUp.origem = player2;
 		}
 
 		if(pair.id == colisaoPlayer1){
@@ -348,6 +374,8 @@ Events.on(engine, "collisionStart", function(event){
 
 			// aumenta a velocidade da bola
 			aumentaVelocidadeBola();
+			// identifica a origem da última rebatida
+			powerUp.origem = player1;
 		}
 
 		if(pair.id == colisaoPontoP1){
@@ -365,13 +393,9 @@ Events.on(engine, "collisionStart", function(event){
 			pair.bodyB.render.fillStyle = 'yellow';
 			Body.setAngularVelocity(powerUp, 0.1);
 			powerUp.collisionFilter = -1;
-			setTimeout(function(){
-				powerUp.collisionFilter = bola.collisionFilter;
-				Body.setVelocity(powerUp, {x: 0, y: 0});
-				Body.setAngularVelocity(powerUp, 0);
-				Body.setPosition(powerUp, {x: Math.floor((Math.random() * LARGURA) + 1), y: Math.floor((Math.random() * ALTURA) + 1)});
-			}, 2000);
+			reduzBarra(powerUp.origem, 5000);
 		}
+
 		if(pair.id == colisaoBordaTopo){
 			aumentaVelocidadeBola();
 		}
@@ -385,3 +409,4 @@ Events.on(engine, "collisionStart", function(event){
 Engine.run(engine);
 //Lança a bola no início da partida
 lancarBola();
+lancarPowerUp();
