@@ -102,6 +102,7 @@ gulp.task( 'connect', function() {
 	connect.server({
 		livereload: true,
 		root: paths.root,
+        port: 8181,
 	});
 });
 
@@ -109,3 +110,4 @@ gulp.task( 'connect', function() {
 // This is the default task - which is run when `gulp` is run
 // The tasks passed in as an array are run before the tasks within the function
 gulp.task('default', ['sass', 'scripts', 'connect', 'watch']);
+gulp.task('lr', ['connect']);
