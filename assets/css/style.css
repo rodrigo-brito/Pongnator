@@ -1,1 +1,1 @@
-body{background:#222;text-align:center}canvas{display:inline-block;max-width:100vw;max-height:85vh;cursor:-webkit-grab;cursor:grab}canvas:active{cursor:-webkit-grabbing;cursor:grabbing}.axis{display:inline-block;margin:20px 40px 0px;color:#fbfbfb;max-width:50%}.output{display:inline-block;width:30px}
+body{background:#222;text-align:center}canvas{display:inline-block;max-width:100vw;max-height:100vh;cursor:-webkit-grab;cursor:grab}canvas:active{cursor:-webkit-grabbing;cursor:grabbing}

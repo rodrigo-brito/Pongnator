@@ -1,4 +1,4 @@
-// Matter.js module aliases
+//// Matter.js module aliases
 var Engine = Matter.Engine,
 World = Matter.World,
 Body = Matter.Body,
@@ -6,65 +6,267 @@ Bodies = Matter.Bodies,
 Common = Matter.Common,
 Constraint = Matter.Constraint,
 Composites = Matter.Composites,
-MouseConstraint = Matter.MouseConstraint;
+Events = Matter.Events,
+MouseConstraint = Matter.MouseConstraint,
+render = Matter.Render.create();
+
+var texPlacar = new Image();
+texPlacar.src = "assets/img/placar.png";
+
+
+var TEX_BOLA = "assets/img/bola1.png";
+var TEX_JOGADOR = "assets/img/jogador1.png";
+var TEX_POWERUP = "assets/img/powerup.png";
+var TEX_BACKGROUND = "assets/img/backgrounds/bg03.png";
+var TEX_BARRA_SUPERIOR = "assets/img/barra_superior.png";
+var TEX_BARRA_INFERIOR = "assets/img/barra_inferior.png";
+
+var LARGURA = 1000;
+var ALTURA = 500;
+
+var minJogadorPosY = 80;
+var maxJogadorPosY = ALTURA-80;
+
+var taxaAumentoVelocidade = .5;
+var velocidadeJogador = 10;
+
+
+var spriteBola = {
+	maxIndice: 29,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+
+		return "assets/img/bola/"+this.indiceAtual+".png";
+	}
+}
+
+var spritePowerUp = {
+	maxIndice: 59,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+		return "assets/img/powerup/"+this.indiceAtual+".png";
+	}
+}
+
+
 
 // create a Matter.js engine
 var engine = Engine.create(document.body, {
 	render: {
 		options: {
 			wireframes: false,
-			showAngleIndicator: true
+			showAngleIndicator: false,
+			width: 1000,
+			height: 500,
+			background: TEX_BACKGROUND,
+		}
+	},
+	world: {
+		gravity: {
+			x: 0,
+			y: 0
 		}
 	}
 });
 
-// gravity init
-engine.world.gravity.x = 0;
-engine.world.gravity.y = 0;
-
-//add a mouse-controlled constraint
+//Controle manual com o mouse de elementos fluidos
 var mouseConstraint = MouseConstraint.create(engine);
 World.add(engine.world, mouseConstraint);
 
-// add boundaries
-var offset = 5;
+/**
+ * Funções de controle da partida
+ * ---------------------------------------------------------------
+ */
+
+function reiniciarRodada(){
+	Body.setVelocity(bola, {x: 0, y: 0});
+	Body.setAngularVelocity(bola, 0);
+	Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
+	estadoAtual = EstadoJogo.PAUSADO;
+}
+
+function lancarBola(){
+	Body.setVelocity(bola, {x: -5, y: -5});
+}
+
+function lancarPowerUp(){
+	setInterval(function(){
+		powerUp.collisionFilter = bola.collisionFilter;
+		Body.setVelocity(powerUp, {x: 0, y: 0});
+		Body.setAngularVelocity(powerUp, 0);
+		Body.setPosition(powerUp, {x: Math.floor((Math.random() * LARGURA) + 1), y: Math.floor((Math.random() * ALTURA) + 1)});
+	}, 10000);
+}
+
+// funcao de desenho
+// realiza todo o desenho dos objetos na tela
+function draw(){
+	// recupera o objeto canvas
+	var context = engine.render.context;
+	// analisa o suporte pelo navegador
+	if(context){
+		//desenha o placar
+		context.drawImage(texPlacar, LARGURA/2-75,0,150,40);
+		context.fillStyle = "#FFF";
+		context.font = "30px Arial";
+		context.fillText(player1.pontuacao, LARGURA/2-55, 26);
+		context.fillText(player2.pontuacao, LARGURA/2+40, 26);
+
+
+		// caso o jogo esteja pausado, pede que o usuario pressione espaco
+		// removendo isto, faz com que o jogo seja continuo
+		if (estadoAtual == EstadoJogo.PAUSADO) {
+			context.fillStyle = "#FFF";
+			context.fillText("Pressione espaco para continuar",300,ALTURA/2);
+
+			// Define que a bola estara estacionaria
+			Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
+			Body.setVelocity(bola, {x: 0, y: 0});
+		}
+
+	}
+
+	// atualiza os sprites
+	bola.render.sprite.texture = spriteBola.getProximoSprite();
+	powerUp.render.sprite.texture = spritePowerUp.getProximoSprite();
+}
+
+/**
+ * Instaciação de elementos na partida
+ * ---------------------------------------------------------------
+ */
+
+
+//Borda Direita
+var bordaDireita = Bodies.rectangle(LARGURA+20, ALTURA/2, 50, 500, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1,
+render: {
+    visible:false
+  }
+ });
+//Borda Esquerda
+var bordaEsquerda = Bodies.rectangle(-20, ALTURA/2, 50, 500, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 ,
+render: {
+    visible:false
+  }
+});
+//Borda Topo
+var bordaTopo = Bodies.rectangle(LARGURA/2, 10, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1 ,
+render: {
+    sprite: {
+      texture: TEX_BARRA_SUPERIOR,
+      xScale: 1.0,
+      yScale: 1.0
+    }
+  }
+});
+//Borda Baixo
+var bordaBaixo = Bodies.rectangle(LARGURA/2, ALTURA-10, LARGURA, 50, { frictionStatic: 0, frictionAir: 0, isStatic: true, friction: 0, restitution: 1,
+render: {
+    sprite: {
+      texture: TEX_BARRA_INFERIOR,
+      xScale: 1.0,
+      yScale: 1.0,
+    }
+  }
+});
+
+//Declaração dos elementos do jogo
+//var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1.07,  frictionStatic: 0, frictionAir: 0 });
+var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1,  frictionStatic: 0, frictionAir: 0,
+render: {
+    sprite: {
+      texture: spriteBola.getProximoSprite(),
+      xScale: 0.4,
+      yScale: 0.4,
+    }
+  }
+});
+
+var player1 = Bodies.rectangle(20, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1,
+render: {
+    sprite: {
+      texture: TEX_JOGADOR,
+      xScale: 0.5,
+      yScale: 0.5
+    }
+  }
+ });
+var player2 = Bodies.rectangle( LARGURA-20, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1, 
+
+render: {
+    sprite: {
+      texture: TEX_JOGADOR,
+      xScale: 0.5,
+      yScale: 0.5
+    }
+  }
+
+});
+var powerUp = Bodies.rectangle( 400, 300, 50, 50, { mass: 0.0000001, inertia: 0, frictionStatic: 0, isStatic: false, frictionAir: 0, friction: 0, restitution: 0 ,
+
+render: {
+    sprite: {
+      texture: spritePowerUp.getProximoSprite(),
+      xScale: 0.4,
+      yScale: 0.4
+    }
+  }
+
+});
+//Atributos auxiliares dos jogadores
+player1.pontuacao = 0;
+player2.pontuacao = 0;
+
+//Adiciona todos os corpos a engine
 World.add(engine.world, [
-	/*Bodies.rectangle(400, -offset, 800 + 2 * offset, 50, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(400, 600 + offset, 800 + 2 * offset, 50, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(800 + offset, 300, 50, 600 + 2 * offset, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(-offset, 300, 50, 600 + 2 * offset, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 })*/
-
-	Bodies.rectangle(400, -offset, 800 + 2 * offset, 50, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(400, 600 + offset, 800 + 2 * offset, 50, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(800 + offset, 300, 50, 600 + 2 * offset, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 }),
-	Bodies.rectangle(-offset, 300, 50, 600 + 2 * offset, { frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 })
-]);
-
-
-var bola = Bodies.circle(400, 300, 15, { inertia: 0, friction: 0, restitution: 1, frictionAir: 0 });
-var player1 = Bodies.rectangle( 50, 100, 20, 100, { inertia: 0, frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 });
-var player2 = Bodies.rectangle( 750, 500, 20, 100, { inertia: 0, frictionStatic: 0, isStatic: true, friction: 0, restitution: 1 });
-
-// add all of the bodies to the world
-World.add(engine.world, [
+	bordaTopo,
+	bordaBaixo,
+	bordaDireita,
+	bordaEsquerda,
 	bola,
 	player1,
-	player2
+	player2,
+	powerUp
 ]);
+
+/**
+ * Movimentação de jogadores
+ * ---------------------------------------------------------------
+ */
 
 // utiliza o handler do teclado para selecionar qual movimento deve ser efetuado
 function moveJogadores() {
 	if(Key.isDown(87)){
-		Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-5 });
+		if(player1.position.y>minJogadorPosY){
+			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-velocidadeJogador });
+		}
 	}
 	if(Key.isDown(83)){
-		Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+5 });
+		if(player1.position.y<maxJogadorPosY){
+			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+velocidadeJogador });
+		}
 	}
 	if(Key.isDown(Key.ACIMA)){
-		Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-5 });
+		if(player2.position.y>minJogadorPosY){
+			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-velocidadeJogador });
+		}
 	}
 	if(Key.isDown(Key.ABAIXO)){
-		Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+5 });
+		if(player2.position.y<maxJogadorPosY){
+			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+velocidadeJogador });
+		}
 	}
 }
 
@@ -91,26 +293,120 @@ var Key = {
 window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-Matter.Events.on(engine, 'afterUpdate', function(){
+// define os estados de jogo possiveis
+var EstadoJogo = {
+	PAUSADO: 1,
+	JOGANDO: 2,
+	TERMINADO: 3,
+};
+
+var estadoAtual = EstadoJogo.JOGANDO;
+
+Events.on(engine, 'afterRender', function(event){
+	if(estadoAtual == EstadoJogo.PAUSADO){
+		if(Key.isDown(32)){
+			estadoAtual = EstadoJogo.JOGANDO;
+			lancarBola();
+		}
+	}
 	moveJogadores();
+	draw();
 });
 
+function aumentaVelocidadeBola(){
+	if(bola.velocity.x>0 && bola.velocity.y>0){
+		Body.setVelocity(bola, {x:bola.velocity.x+taxaAumentoVelocidade,y:bola.velocity.y+taxaAumentoVelocidade});
+	}else if(bola.velocity.x<0 && bola.velocity.y<0){
+		Body.setVelocity(bola, {x:bola.velocity.x-taxaAumentoVelocidade,y:bola.velocity.y-taxaAumentoVelocidade});
+	}else if(bola.velocity.x>0 && bola.velocity.y<0){
+		Body.setVelocity(bola, {x:bola.velocity.x+taxaAumentoVelocidade,y:bola.velocity.y-taxaAumentoVelocidade});
+	}else{
+		Body.setVelocity(bola, {x:bola.velocity.x-taxaAumentoVelocidade,y:bola.velocity.y+taxaAumentoVelocidade});
+	}
+}
 
-Matter.Events.on(engine, "collisionStart", function(event){
-	console.log('colidiu2');
+function reduzBarra(barra, tempo){
+	Body.scale(barra, 1, 0.5);
+	barra.render.sprite.yScale = barra.render.sprite.yScale/2;
+	if(tempo){
+		setTimeout(function(){ aumentaBarra(barra)}, tempo);
+	}
+}
+function aumentaBarra(barra, tempo){
+	barra.render.sprite.yScale = barra.render.sprite.yScale * 2;
+	Body.scale(barra, 1, 2);
+	if(tempo){
+		setTimeout(function(){ reduzBarra(barra)}, tempo);
+	}
+}
+
+/**
+ * Tratamento de colisões
+ * ---------------------------------------------------------------
+ */
+
+var colisaoPlayer1 = Matter.Pair.id(bola, player1);
+var colisaoPlayer2 = Matter.Pair.id(bola, player2);
+var colisaoPontoP1 = Matter.Pair.id(bola, bordaDireita);
+var colisaoPontoP2 = Matter.Pair.id(bola, bordaEsquerda);
+var colisaoPowerUp = Matter.Pair.id(bola, powerUp);
+var colisaoBordaTopo = Matter.Pair.id(bola,bordaTopo);
+var colisaoBordaBaixo = Matter.Pair.id(bola,bordaBaixo);
+
+Events.on(engine, "collisionStart", function(event){
 	var pairs = event.pairs;
+	for (var i = pairs.length - 1; i >= 0; i--) {
+		var pair = pairs[i];
+		if(pair.id == colisaoPlayer2){
+			pair.bodyA.render.fillStyle = 'red';
+			pair.bodyB.render.fillStyle = 'red';
+			//console.log("x "+bola.velocity.x+" y "+bola.velocity.y);
 
-	console.log(pairs);
-    // change object colours to show those in an active collision (e.g. resting contact)
-    for (var i = 0; i < pairs.length; i++) {
-        var pair = pairs[i];
-        pair.bodyA.render.fillStyle = '#ff0';
-        pair.bodyB.render.fillStyle = '#ff0';
-    }
-})
+			// aumenta a velocidade da bola
+			aumentaVelocidadeBola();
+			// identifica a origem da última rebatida
+			powerUp.origem = player2;
+		}
 
+		if(pair.id == colisaoPlayer1){
+			pair.bodyA.render.fillStyle = 'green';
+			pair.bodyB.render.fillStyle = 'green';
 
-// run the engine
+			// aumenta a velocidade da bola
+			aumentaVelocidadeBola();
+			// identifica a origem da última rebatida
+			powerUp.origem = player1;
+		}
+
+		if(pair.id == colisaoPontoP1){
+			player1.pontuacao++;
+			reiniciarRodada();
+		}
+
+		if(pair.id == colisaoPontoP2){
+			player2.pontuacao++;
+			reiniciarRodada();
+		}
+
+		if(pair.id == colisaoPowerUp){
+			pair.bodyA.render.fillStyle = 'yellow';
+			pair.bodyB.render.fillStyle = 'yellow';
+			Body.setAngularVelocity(powerUp, 0.1);
+			powerUp.collisionFilter = -1;
+			reduzBarra(powerUp.origem, 5000);
+		}
+
+		if(pair.id == colisaoBordaTopo){
+			aumentaVelocidadeBola();
+		}
+		if(pair.id == colisaoBordaBaixo){
+			aumentaVelocidadeBola();
+		}
+	}
+});
+
+//Executa a engine
 Engine.run(engine);
-
-Matter.Body.setVelocity(bola, {x: 5, y: 5});
+//Lança a bola no início da partida
+lancarBola();
+lancarPowerUp();
