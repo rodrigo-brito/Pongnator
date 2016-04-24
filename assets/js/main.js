@@ -183,7 +183,6 @@ render: {
 });
 
 //Declaração dos elementos do jogo
-//var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1.07,  frictionStatic: 0, frictionAir: 0 });
 var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1,  frictionStatic: 0, frictionAir: 0,
 render: {
     sprite: {
@@ -249,22 +248,22 @@ World.add(engine.world, [
 // utiliza o handler do teclado para selecionar qual movimento deve ser efetuado
 function moveJogadores() {
 	if(Key.isDown(87)){
-		if(player1.position.y>minJogadorPosY){
+		if(player1.position.y>minJogadorPosY || velocidadeJogador < 0){
 			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-velocidadeJogador });
 		}
 	}
 	if(Key.isDown(83)){
-		if(player1.position.y<maxJogadorPosY){
+		if(player1.position.y<maxJogadorPosY || velocidadeJogador < 0){
 			Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+velocidadeJogador });
 		}
 	}
 	if(Key.isDown(Key.ACIMA)){
-		if(player2.position.y>minJogadorPosY){
+		if(player2.position.y>minJogadorPosY || velocidadeJogador < 0){
 			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-velocidadeJogador });
 		}
 	}
 	if(Key.isDown(Key.ABAIXO)){
-		if(player2.position.y<maxJogadorPosY){
+		if(player2.position.y<maxJogadorPosY || velocidadeJogador < 0){
 			Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+velocidadeJogador });
 		}
 	}
@@ -325,20 +324,48 @@ function aumentaVelocidadeBola(){
 	}
 }
 
-function reduzBarra(barra, tempo){
+var dobraVelocidadeBola = function(barra, tempo){
+	Body.setVelocity(bola, {x: bola.velocity.x*2,y:bola.velocity.y*2});
+	if(tempo){
+		setTimeout(function(){ dividirVelocidadeBola(barra) }, tempo);
+	}
+};
+
+var dividirVelocidadeBola = function(barra, tempo){
+	Body.setVelocity(bola, {x: bola.velocity.x/2,y:bola.velocity.y/2});
+	if(tempo){
+		setTimeout(function(){ dobraVelocidadeBola(barra) }, tempo);
+	}
+};
+
+var reduzBarra = function (barra, tempo){
 	Body.scale(barra, 1, 0.5);
 	barra.render.sprite.yScale = barra.render.sprite.yScale/2;
 	if(tempo){
 		setTimeout(function(){ aumentaBarra(barra)}, tempo);
 	}
-}
-function aumentaBarra(barra, tempo){
+};
+
+var aumentaBarra = function (barra, tempo){
 	barra.render.sprite.yScale = barra.render.sprite.yScale * 2;
 	Body.scale(barra, 1, 2);
 	if(tempo){
 		setTimeout(function(){ reduzBarra(barra)}, tempo);
 	}
-}
+};
+
+var inverterDirecaoBarra = function( barra, tempo ){
+	velocidadeJogador *= -1;
+	if(tempo){
+		setTimeout(function(){ inverterDirecaoBarra(barra)}, tempo);
+	}
+};
+
+var randPowerUp = function ( barra, tempo ) {
+	var efeitos = [ reduzBarra, aumentaBarra, dobraVelocidadeBola, dividirVelocidadeBola, inverterDirecaoBarra ];
+	var efeito = efeitos[Math.floor(Math.random() * efeitos.length)];
+	efeito(barra, tempo);
+};
 
 /**
  * Tratamento de colisões
@@ -356,7 +383,9 @@ var colisaoBordaBaixo = Matter.Pair.id(bola,bordaBaixo);
 Events.on(engine, "collisionStart", function(event){
 	var pairs = event.pairs;
 	for (var i = pairs.length - 1; i >= 0; i--) {
+
 		var pair = pairs[i];
+
 		if(pair.id == colisaoPlayer2){
 			pair.bodyA.render.fillStyle = 'red';
 			pair.bodyB.render.fillStyle = 'red';
@@ -393,12 +422,13 @@ Events.on(engine, "collisionStart", function(event){
 			pair.bodyB.render.fillStyle = 'yellow';
 			Body.setAngularVelocity(powerUp, 0.1);
 			powerUp.collisionFilter = -1;
-			reduzBarra(powerUp.origem, 5000);
+			inverterDirecaoBarra(powerUp.origem, 5000);
 		}
 
 		if(pair.id == colisaoBordaTopo){
 			aumentaVelocidadeBola();
 		}
+
 		if(pair.id == colisaoBordaBaixo){
 			aumentaVelocidadeBola();
 		}
