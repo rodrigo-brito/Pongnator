@@ -1,7 +1,7 @@
 # Pong-Matter
 A simple game developed with Matter JS - PONG
 
-DEMO PAGE - http://rodrigo-brito.github.io/Pong-Matter/
+DEMO PAGE - http://rodrigo-brito.github.io/Pongnator/
 
 ## Requirements Development Environment
 - Node JS / NPM
