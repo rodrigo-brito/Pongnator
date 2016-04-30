@@ -10,6 +10,29 @@ Events = Matter.Events,
 MouseConstraint = Matter.MouseConstraint,
 render = Matter.Render.create();
 
+
+// define os estados de jogo possiveis
+var EstadoJogo = {
+	PAUSADO: 1,
+	JOGANDO: 2,
+	TERMINADO: 3,
+};
+
+// define os diferentes tipos de powerups
+var TiposPowerUp = {
+
+	ALEATORIO: 1,
+	AUMENTAR_BARRA: 2,
+	DIMINUIR_BARRA: 3,
+	INVERTER_BARRA: 4,
+
+}
+
+var estadoAtual = EstadoJogo.JOGANDO;
+
+// define o tipo de powerup atual
+var tipoPowerUpAtual = TiposPowerUp.ALEATORIO;
+
 var texPlacar = new Image();
 texPlacar.src = "assets/img/placar.png";
 
@@ -56,10 +79,51 @@ var spritePowerUp = {
 		}else{
 			this.indiceAtual  = 0;
 		}
-		return "assets/img/powerup/"+this.indiceAtual+".png";
+		return "assets/img/powerup/aleatorio/"+this.indiceAtual+".png";
 	}
 }
 
+var spritePowerUpAumentarBarra = {
+	maxIndice: 59,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+		return "assets/img/powerup/aumentar_barra/"+this.indiceAtual+".png";
+	}
+}
+
+var spritePowerUpDiminuirBarra = {
+	maxIndice: 59,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+		return "assets/img/powerup/diminuir_barra/"+this.indiceAtual+".png";
+	}
+}
+
+var spritePowerInverterDirecaoBarra = {
+	maxIndice: 59,
+	indiceAtual:0,
+
+	getProximoSprite: function(){
+		if(this.indiceAtual < this.maxIndice){
+			this.indiceAtual++;
+		}else{
+			this.indiceAtual  = 0;
+		}
+		return "assets/img/powerup/inverter_barra/"+this.indiceAtual+".png";
+	}
+}
 
 
 // create a Matter.js engine
@@ -103,6 +167,27 @@ function lancarBola(){
 
 function lancarPowerUp(){
 	setInterval(function(){
+
+		// define um tipo aleatorio de powerup
+		var r = Math.floor(Math.random() * 4) + 1;
+		switch(r){
+			case 1:
+				tipoPowerUpAtual = TiposPowerUp.ALEATORIO;
+				break;
+			case 2:
+				tipoPowerUpAtual = TiposPowerUp.AUMENTAR_BARRA;
+				break;
+			case 3:
+				tipoPowerUpAtual = TiposPowerUp.DIMINUIR_BARRA;
+				break;
+			case 4:
+				tipoPowerUpAtual = TiposPowerUp.INVERTER_BARRA;
+				break;
+			default:
+				break;
+
+		}
+
 		powerUp.collisionFilter = bola.collisionFilter;
 		Body.setVelocity(powerUp, {x: 0, y: 0});
 		Body.setAngularVelocity(powerUp, 0);
@@ -140,7 +225,15 @@ function draw(){
 
 	// atualiza os sprites
 	bola.render.sprite.texture = spriteBola.getProximoSprite();
-	powerUp.render.sprite.texture = spritePowerUp.getProximoSprite();
+	if(tipoPowerUpAtual == TiposPowerUp.ALEATORIO){
+		powerUp.render.sprite.texture = spritePowerUp.getProximoSprite();
+	}else if(tipoPowerUpAtual == TiposPowerUp.AUMENTAR_BARRA){
+		powerUp.render.sprite.texture = spritePowerUpAumentarBarra.getProximoSprite();
+	}else if(tipoPowerUpAtual == TiposPowerUp.DIMINUIR_BARRA){
+		powerUp.render.sprite.texture = spritePowerUpDiminuirBarra.getProximoSprite();
+	}else if(tipoPowerUpAtual == TiposPowerUp.INVERTER_BARRA){
+		powerUp.render.sprite.texture = spritePowerInverterDirecaoBarra.getProximoSprite();
+	}
 }
 
 /**
@@ -292,14 +385,6 @@ var Key = {
 window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-// define os estados de jogo possiveis
-var EstadoJogo = {
-	PAUSADO: 1,
-	JOGANDO: 2,
-	TERMINADO: 3,
-};
-
-var estadoAtual = EstadoJogo.JOGANDO;
 
 Events.on(engine, 'afterRender', function(event){
 	if(estadoAtual == EstadoJogo.PAUSADO){
@@ -354,7 +439,7 @@ var aumentaBarra = function (barra, tempo){
 	}
 };
 
-var inverterDirecaoBarra = function( barra, tempo ){
+var inverterDirecaoBarra = function(barra, tempo ){
 	velocidadeJogador *= -1;
 	if(tempo){
 		setTimeout(function(){ inverterDirecaoBarra(barra)}, tempo);
@@ -422,7 +507,16 @@ Events.on(engine, "collisionStart", function(event){
 			pair.bodyB.render.fillStyle = 'yellow';
 			Body.setAngularVelocity(powerUp, 0.1);
 			powerUp.collisionFilter = -1;
-			inverterDirecaoBarra(powerUp.origem, 5000);
+			//inverterDirecaoBarra(powerUp.origem, 5000);
+			if(tipoPowerUpAtual == TiposPowerUp.ALEATORIO){
+				//ADICIONAR POWERUP ALEATORIO AQUI
+			}else if(tipoPowerUpAtual == TiposPowerUp.AUMENTAR_BARRA){
+				aumentaBarra(powerUp.origem, 5000);
+			}else if(tipoPowerUpAtual == TiposPowerUp.DIMINUIR_BARRA){
+				reduzBarra(powerUp.origem, 5000);
+			}else if(tipoPowerUpAtual == TiposPowerUp.INVERTER_BARRA){
+				inverterDirecaoBarra(powerUp.origem, 5000);
+			}
 		}
 
 		if(pair.id == colisaoBordaTopo){
