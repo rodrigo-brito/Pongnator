@@ -10,7 +10,6 @@ Events = Matter.Events,
 MouseConstraint = Matter.MouseConstraint,
 render = Matter.Render.create();
 
-
 // define os estados de jogo possiveis
 var EstadoJogo = {
 	PAUSADO: 1,
@@ -39,10 +38,14 @@ texPlacar.src = "assets/img/placar.png";
 
 var TEX_BOLA = "assets/img/bola1.png";
 var TEX_JOGADOR = "assets/img/jogador1.png";
-var TEX_POWERUP = "assets/img/powerup.png";
+var TEX_POWERUP = "assets/img/powerup/aleatorio/sprites_powerup_aleatorio.png";
+var TEX_POWERUP_AUMENTAR_BARRA = "assets/img/powerup/aumentar_barra/sprites_powerup_aumentar_barra.png";
+var TEX_POWERUP_DIMINUIR_BARRA = "assets/img/powerup/diminuir_barra/sprites_powerup_diminuir_barra.png";
+var TEX_POWERUP_INVERTER_BARRA = "assets/img/powerup/inverter_barra/sprites_powerup_inverter_barra.png";
 var TEX_BACKGROUND = "assets/img/backgrounds/bg03.png";
 var TEX_BARRA_SUPERIOR = "assets/img/barra_superior.png";
 var TEX_BARRA_INFERIOR = "assets/img/barra_inferior.png";
+var TEX_SPRITESHEET_BOLA = "assets/img/bola/spritesheet_bola.png"
 
 var LARGURA = 1000;
 var ALTURA = 500;
@@ -55,73 +58,111 @@ var velocidadeJogador = 10;
 
 
 var spriteBola = {
-	maxIndice: 29,
-	indiceAtual:0,
+	larguraSprite: 128,
+	alturaSprite: 128,
+	// quantidade de figuras na horizontal
+	quantSpritesX: 30,
+	// quantidade de figuras na vertical
+	quantSpritesY: 1,
+	indiceAtualX:0,
+	indiceAtualY:0,
 
-	getProximoSprite: function(){
-		if(this.indiceAtual < this.maxIndice){
-			this.indiceAtual++;
-		}else{
-			this.indiceAtual  = 0;
-		}
+	getNextSourceX: function(){
+		this.indiceAtualX<this.quantSpritesX-1?this.indiceAtualX++:this.indiceAtualX=0;
+		return this.indiceAtualX*this.larguraSprite;
+	},
 
-		return "assets/img/bola/"+this.indiceAtual+".png";
+	getNextSourceY: function(){
+		this.indiceAtualY<this.quantSpritesY-1?this.indiceAtualY++:this.indiceAtualY=0;
+		return this.indiceAtualY*this.alturaSprite;
 	}
 }
 
 var spritePowerUp = {
-	maxIndice: 59,
-	indiceAtual:0,
 
-	getProximoSprite: function(){
-		if(this.indiceAtual < this.maxIndice){
-			this.indiceAtual++;
-		}else{
-			this.indiceAtual  = 0;
-		}
-		return "assets/img/powerup/aleatorio/"+this.indiceAtual+".png";
+
+
+	larguraSprite: 128,
+	alturaSprite: 128,
+	// quantidade de figuras na horizontal
+	quantSpritesX: 60,
+	// quantidade de figuras na vertical
+	quantSpritesY: 1,
+	indiceAtualX:0,
+	indiceAtualY:0,
+
+	getNextSourceX: function(){
+		this.indiceAtualX<this.quantSpritesX-1?this.indiceAtualX++:this.indiceAtualX=0;
+		return this.indiceAtualX*this.larguraSprite;
+	},
+
+	getNextSourceY: function(){
+		this.indiceAtualY<this.quantSpritesY-1?this.indiceAtualY++:this.indiceAtualY=0;
+		return this.indiceAtualY*this.alturaSprite;
 	}
+
 }
 
 var spritePowerUpAumentarBarra = {
-	maxIndice: 59,
-	indiceAtual:0,
+	larguraSprite: 128,
+	alturaSprite: 128,
+	// quantidade de figuras na horizontal
+	quantSpritesX: 60,
+	// quantidade de figuras na vertical
+	quantSpritesY: 1,
+	indiceAtualX:0,
+	indiceAtualY:0,
 
-	getProximoSprite: function(){
-		if(this.indiceAtual < this.maxIndice){
-			this.indiceAtual++;
-		}else{
-			this.indiceAtual  = 0;
-		}
-		return "assets/img/powerup/aumentar_barra/"+this.indiceAtual+".png";
+	getNextSourceX: function(){
+		this.indiceAtualX<this.quantSpritesX-1?this.indiceAtualX++:this.indiceAtualX=0;
+		return this.indiceAtualX*this.larguraSprite;
+	},
+
+	getNextSourceY: function(){
+		this.indiceAtualY<this.quantSpritesY-1?this.indiceAtualY++:this.indiceAtualY=0;
+		return this.indiceAtualY*this.alturaSprite;
 	}
 }
 
 var spritePowerUpDiminuirBarra = {
-	maxIndice: 59,
-	indiceAtual:0,
+	larguraSprite: 128,
+	alturaSprite: 128,
+	// quantidade de figuras na horizontal
+	quantSpritesX: 60,
+	// quantidade de figuras na vertical
+	quantSpritesY: 1,
+	indiceAtualX:0,
+	indiceAtualY:0,
 
-	getProximoSprite: function(){
-		if(this.indiceAtual < this.maxIndice){
-			this.indiceAtual++;
-		}else{
-			this.indiceAtual  = 0;
-		}
-		return "assets/img/powerup/diminuir_barra/"+this.indiceAtual+".png";
+	getNextSourceX: function(){
+		this.indiceAtualX<this.quantSpritesX-1?this.indiceAtualX++:this.indiceAtualX=0;
+		return this.indiceAtualX*this.larguraSprite;
+	},
+
+	getNextSourceY: function(){
+		this.indiceAtualY<this.quantSpritesY-1?this.indiceAtualY++:this.indiceAtualY=0;
+		return this.indiceAtualY*this.alturaSprite;
 	}
 }
 
 var spritePowerInverterDirecaoBarra = {
-	maxIndice: 59,
-	indiceAtual:0,
+	larguraSprite: 128,
+	alturaSprite: 128,
+	// quantidade de figuras na horizontal
+	quantSpritesX: 60,
+	// quantidade de figuras na vertical
+	quantSpritesY: 1,
+	indiceAtualX:0,
+	indiceAtualY:0,
 
-	getProximoSprite: function(){
-		if(this.indiceAtual < this.maxIndice){
-			this.indiceAtual++;
-		}else{
-			this.indiceAtual  = 0;
-		}
-		return "assets/img/powerup/inverter_barra/"+this.indiceAtual+".png";
+	getNextSourceX: function(){
+		this.indiceAtualX<this.quantSpritesX-1?this.indiceAtualX++:this.indiceAtualX=0;
+		return this.indiceAtualX*this.larguraSprite;
+	},
+
+	getNextSourceY: function(){
+		this.indiceAtualY<this.quantSpritesY-1?this.indiceAtualY++:this.indiceAtualY=0;
+		return this.indiceAtualY*this.alturaSprite;
 	}
 }
 
@@ -173,15 +214,19 @@ function lancarPowerUp(){
 		switch(r){
 			case 1:
 				tipoPowerUpAtual = TiposPowerUp.ALEATORIO;
+				powerUp.render.sprite.texture = TEX_POWERUP;
 				break;
 			case 2:
 				tipoPowerUpAtual = TiposPowerUp.AUMENTAR_BARRA;
+				powerUp.render.sprite.texture = TEX_POWERUP_AUMENTAR_BARRA;
 				break;
 			case 3:
 				tipoPowerUpAtual = TiposPowerUp.DIMINUIR_BARRA;
+				powerUp.render.sprite.texture = TEX_POWERUP_DIMINUIR_BARRA;
 				break;
 			case 4:
 				tipoPowerUpAtual = TiposPowerUp.INVERTER_BARRA;
+				powerUp.render.sprite.texture = TEX_POWERUP_INVERTER_BARRA;
 				break;
 			default:
 				break;
@@ -224,16 +269,12 @@ function draw(){
 	}
 
 	// atualiza os sprites
-	bola.render.sprite.texture = spriteBola.getProximoSprite();
-	if(tipoPowerUpAtual == TiposPowerUp.ALEATORIO){
-		powerUp.render.sprite.texture = spritePowerUp.getProximoSprite();
-	}else if(tipoPowerUpAtual == TiposPowerUp.AUMENTAR_BARRA){
-		powerUp.render.sprite.texture = spritePowerUpAumentarBarra.getProximoSprite();
-	}else if(tipoPowerUpAtual == TiposPowerUp.DIMINUIR_BARRA){
-		powerUp.render.sprite.texture = spritePowerUpDiminuirBarra.getProximoSprite();
-	}else if(tipoPowerUpAtual == TiposPowerUp.INVERTER_BARRA){
-		powerUp.render.sprite.texture = spritePowerInverterDirecaoBarra.getProximoSprite();
-	}
+	bola.render.sprite.sourceX = spriteBola.getNextSourceX();
+	bola.render.sprite.sourceY = spriteBola.getNextSourceY();
+	//spriteBola.getNextSourceX();
+	//spriteBola.render;
+	powerUp.render.sprite.sourceX = spritePowerUp.getNextSourceX();
+	powerUp.render.sprite.sourceY = spritePowerUp.getNextSourceY();
 }
 
 /**
@@ -279,12 +320,19 @@ render: {
 var bola = Bodies.circle(LARGURA/2, ALTURA/2, 15, { mass: 1, inertia: 0, friction: 0, restitution: 1,  frictionStatic: 0, frictionAir: 0,
 render: {
     sprite: {
-      texture: spriteBola.getProximoSprite(),
-      xScale: 0.4,
-      yScale: 0.4,
+      texture: TEX_SPRITESHEET_BOLA,
+      xScale: .5/spriteBola.quantSpritesX,
+      yScale: .5/spriteBola.quantSpritesY,
+      sourceX: spriteBola.getNextSourceX(),
+      sourceY: spriteBola.getNextSourceY(),
+      sourceWidth: spriteBola.larguraSprite,
+      sourceHeight: spriteBola.alturaSprite,
+
     }
   }
 });
+
+
 
 var player1 = Bodies.rectangle(20, ALTURA/2, 20, 100, { inertia: 0, frictionStatic: 1, isStatic: true, frictionAir: 0, friction: 0, restitution: 1,
 render: {
@@ -310,10 +358,14 @@ var powerUp = Bodies.rectangle( 400, 300, 50, 50, { mass: 0.0000001, inertia: 0,
 
 render: {
     sprite: {
-      texture: spritePowerUp.getProximoSprite(),
-      xScale: 0.4,
-      yScale: 0.4
-    }
+      texture: TEX_POWERUP,
+      xScale: .8/spritePowerUp.quantSpritesX,
+      yScale: .8/spritePowerUp.quantSpritesY,
+      sourceX: spritePowerUp.getNextSourceX(),
+      sourceY: spritePowerUp.getNextSourceY(),
+      sourceWidth: spritePowerUp.larguraSprite,
+      sourceHeight: spritePowerUp.alturaSprite,
+    },
   }
 
 });
