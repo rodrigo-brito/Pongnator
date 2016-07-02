@@ -16,6 +16,7 @@ window.onload = function(){
 		PAUSADO: 1,
 		JOGANDO: 2,
 		TERMINADO: 3,
+		MENU: 4,
 	};
 
 	// define os diferentes tipos de powerups
@@ -28,7 +29,11 @@ window.onload = function(){
 
 	}
 
-	var estadoAtual = EstadoJogo.JOGANDO;
+	var opcaoSelecionadaMenu = 1;
+
+	// define que ao entrar no jogo, o primeiro estado e o menu
+	var estadoAtual = EstadoJogo.MENU;
+	//var estadoAtual = EstadoJogo.JOGANDO;
 
 	// define o tipo de powerup atual
 	var tipoPowerUpAtual = TiposPowerUp.ALEATORIO;
@@ -36,6 +41,18 @@ window.onload = function(){
 	var texPlacar = new Image();
 	texPlacar.src = "assets/img/placar.png";
 
+
+	var texMenu = new Image();
+	texMenu.src = "assets/img/menu/menu_fundo.png";
+
+	var texBtnNovo = new Image();
+	texBtnNovo.src = "assets/img/menu/btn_novo_original.png";
+
+	var texBtnPlacar = new Image();
+	texBtnPlacar.src = "assets/img/menu/btn_placar_original.png";
+
+	var texBtnSair = new Image();
+	texBtnSair.src = "assets/img/menu/btn_sair_original.png";
 
 	var TEX_BOLA = "assets/img/bola1.png";
 	var TEX_JOGADOR = "assets/img/jogador1.png";
@@ -58,6 +75,9 @@ window.onload = function(){
 	var taxaAumentoVelocidade = .5;
 	var velocidadeJogador = 10;
 
+
+	// utilizado pela contagem regressiva
+	var tempoContagemRegressiva = 0;
 
 	var spriteBola = {
 		larguraSprite: 128,
@@ -206,7 +226,12 @@ window.onload = function(){
 	}
 
 	function lancarBola(){
-		Body.setVelocity(bola, {x: -5, y: -5});
+		if(Math.floor(Math.random() * 2) + 1 == 1){
+			Body.setVelocity(bola, {x: -5, y: -5});
+		}else{
+			Body.setVelocity(bola, {x: 5, y: 5});
+		}
+		
 	}
 
 	function lancarPowerUp(){
@@ -261,13 +286,51 @@ window.onload = function(){
 			// caso o jogo esteja pausado, pede que o usuario pressione espaco
 			// removendo isto, faz com que o jogo seja continuo
 			if (estadoAtual == EstadoJogo.PAUSADO) {
+				context.font = "60px Arial";
+				context.fillStyle = "#000";
+				context.fillRect(0,ALTURA/2-70,LARGURA,100);
 				context.fillStyle = "#FFF";
-				context.fillText("Pressione espaco para continuar",300,ALTURA/2);
+				context.fillText("Pressione espaço para continuar",LARGURA/2-450,ALTURA/2);
 
 				// Define que a bola estara estacionaria
 				Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
 				Body.setVelocity(bola, {x: 0, y: 0});
 			}
+
+
+			// caso o jogo esteja em menu, pede que o usuario pressione alguma opcao
+			if (estadoAtual == EstadoJogo.MENU) {
+				context.drawImage(texMenu, 0,0,LARGURA,ALTURA);
+				context.drawImage(texBtnNovo,(LARGURA/2)-(texBtnNovo.naturalWidth/2),((ALTURA/2)-(texBtnNovo.naturalHeight/2))-40);
+				context.drawImage(texBtnPlacar,(LARGURA/2)-(texBtnPlacar.naturalWidth/2),((ALTURA/2)-(texBtnPlacar.naturalHeight/2))+40);
+				context.drawImage(texBtnSair,(LARGURA/2)-(texBtnSair.naturalWidth/2),((ALTURA/2)-(texBtnSair.naturalHeight/2))+120);
+
+
+				// Colore as opcoes de acordo com a que foi selecionada
+				if(opcaoSelecionadaMenu == 1){
+					texBtnNovo.src = "assets/img/menu/btn_novo_copia.png";
+				}else{
+					texBtnNovo.src = "assets/img/menu/btn_novo_original.png";
+				}
+				if(opcaoSelecionadaMenu == 2){
+					texBtnPlacar.src = "assets/img/menu/btn_placar_copia.png";
+				}else{
+					texBtnPlacar.src = "assets/img/menu/btn_placar_original.png";
+				}
+				if(opcaoSelecionadaMenu == 3){
+					texBtnSair.src = "assets/img/menu/btn_sair_copia.png";
+				}else{
+					texBtnSair.src = "assets/img/menu/btn_sair_original.png";
+				}
+
+				//context.fillStyle = "#FFF";
+				//context.fillText("MENU",300,ALTURA/2);
+
+				// Define que a bola estara estacionaria
+				Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
+				Body.setVelocity(bola, {x: 0, y: 0});
+			}
+
 
 		}
 
@@ -395,27 +458,72 @@ window.onload = function(){
 
 	// utiliza o handler do teclado para selecionar qual movimento deve ser efetuado
 	function moveJogadores() {
-		if(Key.isDown(87)){
-			if(player1.position.y>minJogadorPosY || velocidadeJogador < 0){
-				Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-velocidadeJogador });
+		if(estadoAtual == EstadoJogo.JOGANDO){
+			if(Key.isDown(87)){
+				if(player1.position.y>minJogadorPosY || velocidadeJogador < 0){
+					Body.setPosition(player1, { x: player1.position.x, y: player1.position.y-velocidadeJogador });
+				}
 			}
+			if(Key.isDown(83)){
+				if(player1.position.y<maxJogadorPosY || velocidadeJogador < 0){
+					Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+velocidadeJogador });
+				}
+			}
+			if(Key.isDown(Key.ACIMA)){
+				if(player2.position.y>minJogadorPosY || velocidadeJogador < 0){
+					Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-velocidadeJogador });
+				}
+			}
+			if(Key.isDown(Key.ABAIXO)){
+				if(player2.position.y<maxJogadorPosY || velocidadeJogador < 0){
+					Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+velocidadeJogador });
+				}
+			}
+			if(Key.isDown(27)){
+				estadoAtual = 4;
+			}
+
 		}
-		if(Key.isDown(83)){
-			if(player1.position.y<maxJogadorPosY || velocidadeJogador < 0){
-				Body.setPosition(player1, { x: player1.position.x, y: player1.position.y+velocidadeJogador });
-			}
-		}
-		if(Key.isDown(Key.ACIMA)){
-			if(player2.position.y>minJogadorPosY || velocidadeJogador < 0){
-				Body.setPosition(player2, { x: player2.position.x, y: player2.position.y-velocidadeJogador });
-			}
-		}
-		if(Key.isDown(Key.ABAIXO)){
-			if(player2.position.y<maxJogadorPosY || velocidadeJogador < 0){
-				Body.setPosition(player2, { x: player2.position.x, y: player2.position.y+velocidadeJogador });
-			}
+
+		else if(estadoAtual == EstadoJogo.MENU){
+
+
+			document.onkeyup = function (e) {
+			    e = e || window.event;
+			    console.log(e);
+			    
+			    // acima
+			    if(e.keyCode==40){
+			    	if(opcaoSelecionadaMenu<3){
+			    		opcaoSelecionadaMenu++;
+			    	}else{
+			    		opcaoSelecionadaMenu=1;
+			    	}
+			    }
+
+			    // abaixo
+			    if(e.keyCode==38){
+			    	if(opcaoSelecionadaMenu>1){
+			    		opcaoSelecionadaMenu--;
+			    	}else{
+			    		opcaoSelecionadaMenu=3;
+			    	}
+			    }
+
+    			// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu==1){
+					estadoAtual = EstadoJogo.JOGANDO;
+					lancarBola();
+					//lancarPowerUp();
+					
+				}
+			};
+
+
+			
 		}
 	}
+
 
 	function setPlayerPosition(player, y){
 		if(y > minJogadorPosY && y < maxJogadorPosY){
@@ -450,7 +558,7 @@ window.onload = function(){
 	window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 	window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-	var tracker = new tracking.ColorTracker(['yellow', 'magenta']);
+	/*var tracker = new tracking.ColorTracker(['yellow', 'magenta']);
 	tracking.track('#webcam', tracker, { camera: true });
 	tracker.on('track', function(event) {
 		event.data.forEach(function(rect) {
@@ -465,10 +573,16 @@ window.onload = function(){
 				console.log('magenta');
 			}
 		});
-	});
+	});*/
+
+	x=0;
 
 	Events.on(engine, 'afterRender', function(event){
+		if(estadoAtual == EstadoJogo.MENU){
+
+		}
 		if(estadoAtual == EstadoJogo.PAUSADO){
+
 			if(Key.isDown(32)){
 				estadoAtual = EstadoJogo.JOGANDO;
 				lancarBola();
@@ -478,6 +592,7 @@ window.onload = function(){
 		moveJogadores();
 		draw();
 	});
+
 
 	function aumentaVelocidadeBola(){
 		if(bola.velocity.x>0 && bola.velocity.y>0){
@@ -610,6 +725,7 @@ window.onload = function(){
 			}
 		}
 	});
+
 
 	//Executa a engine
 	Engine.run(engine);
