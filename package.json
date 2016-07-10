@@ -1,13 +1,10 @@
 {
+  "private": true,
   "devDependencies": {
-    "gulp": "~3.9.1",
-    "gulp-autoprefixer": "~3.1.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-connect": "^2.3.1",
-    "gulp-plumber": "^1.1.0",
-    "gulp-sass": "~2.2.0",
-    "gulp-server-livereload": "^1.7.0",
-    "gulp-strip-css-comments": "^1.2.0",
-    "gulp-uglify": "^1.5.3"
+    "gulp": "^3.9.1"
+  },
+  "dependencies": {
+    "laravel-elixir": "^5.0.0",
+    "bootstrap-sass": "^3.0.0"
   }
 }
