@@ -25,6 +25,7 @@
                     <ul class="nav navbar-nav">
                         <li class="{{ isset($page) && $page == "jogador" ? "active" : "" }}"><a href="{{ route("jogador") }}"><i class="fa fa-user"></i> Jogadores</a></li>
                         <li class="{{ isset($page) && $page == "campeonato" ? "active" : "" }}"><a href="{{ route("campeonato") }}"><i class="fa fa-gamepad"></i> Campeonato</a></li>
+                        <li><a href="{{ route("jogar") }}"><i class="fa fa-play"></i> Jogar Amistoso</a></li>
                     </ul>
                 </div>
             </div>

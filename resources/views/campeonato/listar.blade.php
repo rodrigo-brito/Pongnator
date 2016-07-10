@@ -75,7 +75,12 @@
                             <div class="row">
                                 <div class="col-md-12" style="text-align: center">
                                     <p>{{ $duracao }}</p>
-                                    <a class="btn btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"><i class="fa fa-pencil"></i> Alterar</a>
+                                    <div class="btn-group">
+                                        @if( $partida->podeJogar() )
+                                        <a class="btn btn-sm btn-raised btn-warning" href="{{ route("campeonato.jogar", ["id" => $partida]) }}"></i> Jogar</a>
+                                        @endif
+                                        <a class="btn btn-sm btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"></i> Alterar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -128,7 +133,7 @@
                                         <?php if ($ganhador == 1) { ?>    
                                             <i class="fa fa-trophy vencedor"></i> 
                                         <?php } ?>
-                                        {{ $pontos1 }}</p>                      
+                                        {{ $pontos1 }}</p>
                                 </div>
                                 <div class="col-md-2 versus">
                                     vs.
@@ -146,7 +151,12 @@
                             <div class="row">
                                 <div class="col-md-12" style="text-align: center">
                                     <p>{{ $duracao }}</p>
-                                    <a class="btn btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"><i class="fa fa-pencil"></i> Alterar</a>
+                                    <div class="btn-group">
+                                        @if( $partida->podeJogar() )
+                                        <a class="btn btn-sm btn-raised btn-warning" href="{{ route("campeonato.jogar", ["id" => $partida]) }}"></i> Jogar</a>
+                                        @endif
+                                        <a class="btn btn-sm btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"></i> Alterar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,7 +225,12 @@
                             <div class="row">
                                 <div class="col-md-12" style="text-align: center">
                                     <p>{{ $duracao }}</p>
-                                    <a class="btn btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"><i class="fa fa-pencil"></i> Alterar</a>
+                                    <div class="btn-group">
+                                        @if( $partida->podeJogar() )
+                                        <a class="btn btn-md btn-raised btn-warning" href="{{ route("campeonato.jogar", ["id" => $partida]) }}"></i> Jogar</a>
+                                        @endif
+                                        <a class="btn btn-md btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"></i> Alterar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -291,7 +306,12 @@
                         <div class="row">
                             <div class="col-md-12" style="text-align: center">
                                 <p>{{ $duracao }}</p>
-                                <a class="btn btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"><i class="fa fa-pencil"></i> Alterar</a>
+                                <div class="btn-group">
+                                    @if( $partida->podeJogar() )
+                                    <a class="btn btn-lg btn-raised btn-warning" href="{{ route("campeonato.jogar", ["id" => $partida]) }}"></i> Jogar</a>
+                                    @endif
+                                    <a class="btn btn-lg btn-raised btn-primary" href="{{ route("campeonato.editar", ["id" => $partida]) }}"></i> Alterar</a>
+                                </div>
                             </div>
                         </div>
 

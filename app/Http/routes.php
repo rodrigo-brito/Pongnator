@@ -17,8 +17,17 @@
  */
 Route::get('/', ["as" => "/", function () {
         return view('index');
-    }]);
-    
+}]);
+
+Route::get('/jogar', ["as" => "jogar", function () {
+    $jogador1 = new Jogador([
+      'nome' => 'Jogador 1'
+    ]);
+    $jogador2 = new Jogador([
+      'nome' => 'Jogador 2'
+    ]);
+    return view('jogo.index', ['jogador1' => $jogador1, 'jogador2' => $jogador2, 'partida_id' => 'amistoso']);
+}]);
 /*
  *  Rotas do jogador
  */
@@ -40,6 +49,8 @@ Route::group(['prefix' => 'jogador'], function () {
 Route::group(['prefix' => 'campeonato'], function () {
     // rota principal
     Route::get('/', ['as' => 'campeonato', 'uses' => 'CampeonatoController@index']);
+
+    Route::get('/iniciar-partida', ['as' => 'campeonato.jogar', 'uses' => 'CampeonatoController@jogar']);
     
     Route::get('/editar/{id}', ['as' => 'campeonato.editar', 'uses' => 'CampeonatoController@edit']);
     

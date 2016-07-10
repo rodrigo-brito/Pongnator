@@ -41,30 +41,58 @@ class CampeonatoController extends Controller {
      */
     public function update(Request $request) {
         $dados = $request->all();
-        $validate = Validator::make($dados, [
-            'jogador_1' => 'exists:jogador,id',
-            'jogador_2' => 'exists:jogador,id',
-            'pontos_1' => 'Integer',
-            'pontos_2' => 'Integer',
-            'duracao' => 'date_format:"i:s"',
-        ]);
-
-        if ($validate->fails()) {
-            return redirect()->back()->withErrors($validate->errors());
-        }
 
         $id = $request->input('id');
 
-        $partida = Partida::find($id);
-        $partida->fill([
-            "jogador_1" => $dados["jogador_1"],
-            "jogador_2" => $dados["jogador_2"],
-            "pontos_1" => $dados["pontos_1"],
-            "pontos_2" => $dados["pontos_2"],
-            "duracao" => $dados["duracao"],
+        if($id == 'amistoso'){
+            return redirect()->route('/')->with('status', 'Amistoso finalizado, inicie uma nova partida.');
+        }else{
+            $validate = Validator::make($dados, [
+                'jogador_1' => 'exists:jogador,id',
+                'jogador_2' => 'exists:jogador,id',
+                'pontos_1' => 'Integer',
+                'pontos_2' => 'Integer',
+                'duracao' => 'date_format:"i:s"',
+            ]);
+
+            if ($validate->fails()) {
+                return redirect()->back()->withErrors($validate->errors());
+            }
+
+            $partida = Partida::find($id);
+            $partida->fill([
+                "jogador_1" => $dados["jogador_1"],
+                "jogador_2" => $dados["jogador_2"],
+                "pontos_1" => $dados["pontos_1"],
+                "pontos_2" => $dados["pontos_2"],
+                "duracao" => $dados["duracao"],
+            ]);
+            $partida->save();
+            return redirect()->route('campeonato')->with('status', 'Partida atualizada com sucesso!');
+        }
+    }
+
+
+    /**
+     * Iniciar partida
+     */
+    public function jogar(Request $request) {
+        $dados = $request->all();
+
+        $validate = Validator::make($dados, [
+            'id' => 'required|exists:partida,id'
         ]);
-        $partida->save();
-        return redirect()->route('campeonato')->with('status', 'Partida atualizada com sucesso!');
+
+        if ($validate->fails()) {
+            return redirect()->back()->withErrors(['Partida não encontrada!']);
+        }
+
+        $partida = Partida::find($dados['id']);
+
+        $jogador1 = $partida->getJogador1();
+        $jogador2 = $partida->getJogador2();
+
+        return view('jogo.index', ['jogador1' => $jogador1, 'jogador2' => $jogador2, 'partida_id' => $dados['id'] ]);
     }
 
     /**

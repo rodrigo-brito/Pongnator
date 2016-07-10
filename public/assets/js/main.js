@@ -10,6 +10,9 @@ window.onload = function(){
 	Events = Matter.Events,
 	MouseConstraint = Matter.MouseConstraint,
 	Render = Matter.Render;
+	var tempo_inicio = new Date();
+
+	var BASE_URL = document.querySelector("#base_url").value;
 
 	// define os estados de jogo possiveis
 	var EstadoJogo = {
@@ -29,6 +32,8 @@ window.onload = function(){
 
 	}
 
+	var PONTUACAO_MAX = 1;
+
 	var opcaoSelecionadaMenu = 1;
 
 	// define que ao entrar no jogo, o primeiro estado e o menu
@@ -39,31 +44,31 @@ window.onload = function(){
 	var tipoPowerUpAtual = TiposPowerUp.ALEATORIO;
 
 	var texPlacar = new Image();
-	texPlacar.src = "assets/img/placar.png";
+	texPlacar.src = BASE_URL + "assets/img/placar.png";
 
 
 	var texMenu = new Image();
-	texMenu.src = "assets/img/menu/menu_fundo.png";
+	texMenu.src = BASE_URL + "assets/img/menu/menu_fundo.png";
 
 	var texBtnNovo = new Image();
-	texBtnNovo.src = "assets/img/menu/btn_novo_original.png";
+	texBtnNovo.src = BASE_URL + "assets/img/menu/btn_novo_original.png";
 
 	var texBtnPlacar = new Image();
-	texBtnPlacar.src = "assets/img/menu/btn_placar_original.png";
+	texBtnPlacar.src = BASE_URL + "assets/img/menu/btn_placar_original.png";
 
 	var texBtnSair = new Image();
-	texBtnSair.src = "assets/img/menu/btn_sair_original.png";
+	texBtnSair.src = BASE_URL + "assets/img/menu/btn_sair_original.png";
 
-	var TEX_BOLA = "assets/img/bola1.png";
-	var TEX_JOGADOR = "assets/img/jogador1.png";
-	var TEX_POWERUP = "assets/img/powerup/aleatorio/sprites_powerup_aleatorio.png";
-	var TEX_POWERUP_AUMENTAR_BARRA = "assets/img/powerup/aumentar_barra/sprites_powerup_aumentar_barra.png";
-	var TEX_POWERUP_DIMINUIR_BARRA = "assets/img/powerup/diminuir_barra/sprites_powerup_diminuir_barra.png";
-	var TEX_POWERUP_INVERTER_BARRA = "assets/img/powerup/inverter_barra/sprites_powerup_inverter_barra.png";
-	var TEX_BACKGROUND = "assets/img/backgrounds/bg03.png";
-	var TEX_BARRA_SUPERIOR = "assets/img/barra_superior.png";
-	var TEX_BARRA_INFERIOR = "assets/img/barra_inferior.png";
-	var TEX_SPRITESHEET_BOLA = "assets/img/bola/spritesheet_bola.png"
+	var TEX_BOLA = BASE_URL + "assets/img/bola1.png";
+	var TEX_JOGADOR = BASE_URL + "assets/img/jogador1.png";
+	var TEX_POWERUP = BASE_URL + "assets/img/powerup/aleatorio/sprites_powerup_aleatorio.png";
+	var TEX_POWERUP_AUMENTAR_BARRA = BASE_URL + "assets/img/powerup/aumentar_barra/sprites_powerup_aumentar_barra.png";
+	var TEX_POWERUP_DIMINUIR_BARRA = BASE_URL + "assets/img/powerup/diminuir_barra/sprites_powerup_diminuir_barra.png";
+	var TEX_POWERUP_INVERTER_BARRA = BASE_URL + "assets/img/powerup/inverter_barra/sprites_powerup_inverter_barra.png";
+	var TEX_BACKGROUND = BASE_URL + "assets/img/backgrounds/bg03.png";
+	var TEX_BARRA_SUPERIOR = BASE_URL + "assets/img/barra_superior.png";
+	var TEX_BARRA_INFERIOR = BASE_URL + "assets/img/barra_inferior.png";
+	var TEX_SPRITESHEET_BOLA = BASE_URL + "assets/img/bola/spritesheet_bola.png"
 
 	var LARGURA = 1000;
 	var ALTURA = 500;
@@ -219,10 +224,18 @@ window.onload = function(){
 	 */
 
 	function reiniciarRodada(){
-		Body.setVelocity(bola, {x: 0, y: 0});
-		Body.setAngularVelocity(bola, 0);
-		Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
-		estadoAtual = EstadoJogo.PAUSADO;
+		if( player1.pontuacao >= PONTUACAO_MAX || player2.pontuacao >= PONTUACAO_MAX){
+			var tempo_fim = new Date();
+			var tempo = tempo_final(tempo_fim, tempo_inicio);
+			document.querySelector('#tempo').value = tempo;
+			alert("Fim de partida! ")
+			document.querySelector('#partida_form').submit();
+		}else{
+			Body.setVelocity(bola, {x: 0, y: 0});
+			Body.setAngularVelocity(bola, 0);
+			Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
+			estadoAtual = EstadoJogo.PAUSADO;
+		}
 	}
 
 	function lancarBola(){
@@ -231,7 +244,20 @@ window.onload = function(){
 		}else{
 			Body.setVelocity(bola, {x: 5, y: 5});
 		}
-		
+	}
+
+	function addZero(i) {
+	    if (i < 10) {
+	        i = "0" + i;
+	    }
+	    return i;
+	}
+
+	function tempo_final(data1, data2){
+		var d = new Date(data1 - data2);
+	    var m = addZero(d.getMinutes());
+	    var s = addZero(d.getSeconds());
+		return m + ":" + s;
 	}
 
 	function lancarPowerUp(){
@@ -308,19 +334,19 @@ window.onload = function(){
 
 				// Colore as opcoes de acordo com a que foi selecionada
 				if(opcaoSelecionadaMenu == 1){
-					texBtnNovo.src = "assets/img/menu/btn_novo_copia.png";
+					texBtnNovo.src = BASE_URL + "assets/img/menu/btn_novo_copia.png";
 				}else{
-					texBtnNovo.src = "assets/img/menu/btn_novo_original.png";
+					texBtnNovo.src = BASE_URL + "assets/img/menu/btn_novo_original.png";
 				}
 				if(opcaoSelecionadaMenu == 2){
-					texBtnPlacar.src = "assets/img/menu/btn_placar_copia.png";
+					texBtnPlacar.src = BASE_URL + "assets/img/menu/btn_placar_copia.png";
 				}else{
-					texBtnPlacar.src = "assets/img/menu/btn_placar_original.png";
+					texBtnPlacar.src = BASE_URL + "assets/img/menu/btn_placar_original.png";
 				}
 				if(opcaoSelecionadaMenu == 3){
-					texBtnSair.src = "assets/img/menu/btn_sair_copia.png";
+					texBtnSair.src = BASE_URL + "assets/img/menu/btn_sair_copia.png";
 				}else{
-					texBtnSair.src = "assets/img/menu/btn_sair_original.png";
+					texBtnSair.src = BASE_URL + "assets/img/menu/btn_sair_original.png";
 				}
 
 				//context.fillStyle = "#FFF";
@@ -490,8 +516,7 @@ window.onload = function(){
 
 			document.onkeyup = function (e) {
 			    e = e || window.event;
-			    console.log(e);
-			    
+
 			    // acima
 			    if(e.keyCode==40){
 			    	if(opcaoSelecionadaMenu<3){
@@ -511,16 +536,21 @@ window.onload = function(){
 			    }
 
     			// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
-				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu==1){
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 1){
 					estadoAtual = EstadoJogo.JOGANDO;
 					lancarBola();
-					//lancarPowerUp();
-					
+				}
+
+				// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 2){
+					window.location = BASE_URL + 'campeonato';
+				}
+
+				// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 3){
+					window.location = BASE_URL;
 				}
 			};
-
-
-			
 		}
 	}
 
@@ -558,7 +588,9 @@ window.onload = function(){
 	window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 	window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-	/*var tracker = new tracking.ColorTracker(['yellow', 'magenta']);
+	var tracker = new tracking.ColorTracker(['yellow', 'magenta']);
+	tracker.setMinDimension(10);
+	tracker.setMinGroupSize(30);
 	tracking.track('#webcam', tracker, { camera: true });
 	tracker.on('track', function(event) {
 		event.data.forEach(function(rect) {
@@ -566,14 +598,12 @@ window.onload = function(){
 			var posicao_proporcional = (posicao*ALTURA)/ALTURA_WEBCAM;
 			if( rect.color == 'yellow' ){//player 1
 				setPlayerPosition(player1, posicao_proporcional);
-				console.log('yellow');
 			}
 			if( rect.color == 'magenta'){//player 2
 				setPlayerPosition(player2, posicao_proporcional);
-				console.log('magenta');
 			}
 		});
-	});*/
+	});
 
 	x=0;
 
@@ -691,11 +721,15 @@ window.onload = function(){
 
 			if(pair.id == colisaoPontoP1){
 				player1.pontuacao++;
+				var pontos1 = document.querySelector("#pontos_1");
+				pontos1.value = player1.pontuacao;
 				reiniciarRodada();
 			}
 
 			if(pair.id == colisaoPontoP2){
 				player2.pontuacao++;
+				var pontos2 = document.querySelector("#pontos_2");
+				pontos2.value = player2.pontuacao;
 				reiniciarRodada();
 			}
 
