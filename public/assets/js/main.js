@@ -32,7 +32,7 @@ window.onload = function(){
 
 	}
 
-	var PONTUACAO_MAX = 1;
+	var PONTUACAO_MAX = 5;
 
 	var opcaoSelecionadaMenu = 1;
 
@@ -587,6 +587,18 @@ window.onload = function(){
 
 	window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 	window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
+
+	tracking.ColorTracker.registerColor('magenta', function(r, g, b) {
+		var threshold = 30,
+		dx = r - 255,
+		dy = g - 0,
+		dz = b - 255;
+
+		if ((r - g) >= threshold && (b - g) >= threshold) {
+			return true;
+		}
+		return dx * dx + dy * dy + dz * dz < 19600;
+	});
 
 	var tracker = new tracking.ColorTracker(['yellow', 'magenta']);
 	tracker.setMinDimension(10);
