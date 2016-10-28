@@ -225,6 +225,7 @@ window.onload = function(){
 
 	function reiniciarRodada(){
 		if( player1.pontuacao >= PONTUACAO_MAX || player2.pontuacao >= PONTUACAO_MAX){
+			console.log('fim de partida');
 			var tempo_fim = new Date();
 			var tempo = tempo_final(tempo_fim, tempo_inicio);
 			document.querySelector('#tempo').value = tempo;
@@ -235,6 +236,7 @@ window.onload = function(){
 			Body.setAngularVelocity(bola, 0);
 			Body.setPosition(bola, {x: LARGURA/2-7, y: ALTURA/2-7});
 			estadoAtual = EstadoJogo.PAUSADO;
+			console.log('saída de bola');
 		}
 	}
 
@@ -536,18 +538,18 @@ window.onload = function(){
 			    }
 
     			// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
-				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 1){
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 1 && estadoAtual == EstadoJogo.MENU){
 					estadoAtual = EstadoJogo.JOGANDO;
 					lancarBola();
 				}
 
 				// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
-				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 2){
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 2 && estadoAtual == EstadoJogo.MENU){
 					window.location = BASE_URL + 'campeonato';
 				}
 
 				// caso a barra de espaco seja pressionada e a opcao selecionada seja de novo jogo, inicia o jogo
-				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 3){
+				if((e.keyCode==32 || e.keyCode==13) && opcaoSelecionadaMenu == 3 && estadoAtual == EstadoJogo.MENU){
 					window.location = BASE_URL;
 				}
 			};
